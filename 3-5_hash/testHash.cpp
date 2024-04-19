@@ -4,6 +4,7 @@
 #include <thread>
 #include <vector>
 #include <openssl/sha.h>
+#include <cstring>
 
 using namespace std;
 
@@ -91,6 +92,27 @@ void PrintHex(string data)
     }
     cout << endl;
 }
+
+void TestBit(void)
+{
+    unsigned char data[128] = "测试比特币挖矿，模拟交易链";
+    int data_size = strlen((char *)data);
+    unsigned int nonce = 0; // 找到nonce
+    unsigned char md1[1024] = {0};
+    unsigned char md2[1024] = {0};
+
+    for (;;) {
+        nonce++;
+        memcpy(data + data_size, &nonce, sizeof(nonce));
+        SHA256(data, data_size + sizeof(nonce), md1);
+        SHA256(md1, 64, md2);
+        if (md2[0] == 0 && md2[1] == 0 && md2[2] == 0)
+            break;
+    }
+
+    cout << "nonce = " << dec << nonce << endl;
+}
+
 int main(int argc, char *argv[])
 {
     cout << "Test Hash!" << endl;
@@ -121,19 +143,21 @@ int main(int argc, char *argv[])
     PrintHex(hash1);
 
     //验证文件完整性
-    for (;;) {
-        string hash2 = GetFileListHash(filepath);
-        string thash = GetFileMerkleHash(filepath);
-        cout << "HashList:\t";
-        PrintHex(hash2);
-        cout << "MerkleTree:\t";
-        PrintHex(thash);
-        if (hash2 != hash1) {
-            cout << "文件被修改: ";
-            PrintHex(hash2);
-        }
-        this_thread::sleep_for(1s);
-    }
+    // for (;;) {
+    //     string hash2 = GetFileListHash(filepath);
+    //     string thash = GetFileMerkleHash(filepath);
+    //     cout << "HashList:\t";
+    //     PrintHex(hash2);
+    //     cout << "MerkleTree:\t";
+    //     PrintHex(thash);
+    //     if (hash2 != hash1) {
+    //         cout << "文件被修改: ";
+    //         PrintHex(hash2);
+    //     }
+    //     this_thread::sleep_for(1s);
+    // }
+
+    TestBit();
 
     return 0;
 }
